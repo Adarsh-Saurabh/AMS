@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Adarsh ka project{% endblock %}</title>
+    <style>
+        body {
+            background-color: cornsilk;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+        }
+        nav {
+            margin: 20px 0;
+            text-align: center;
+        }
+        nav a {
+            margin: 0 15px;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+        nav a:hover {
+            color: #007BFF;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .btn {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        .popup.active {
+            display: block;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        .overlay.active {
+            display: block;
+        }
+    </style>
+    <script>
+        function showPopup() {
+            document.getElementById('overlay').classList.add('active');
+            document.getElementById('popup').classList.add('active');
+        }
+
+        function hidePopup() {
+            document.getElementById('overlay').classList.remove('active');
+            document.getElementById('popup').classList.remove('active');
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const messages = document.querySelectorAll(".messages p");
+            if (messages.length > 0) {
+                hidePopup();
+            }
+        });
+    </script>
+</head>
+<body>
+
+<header>
+    <h1>Attendance Management System</h1>
+</header>
+
+<nav>
+    <a href="/">Home</a>
+    <a href="/train_page">Train Model</a>
+    <a href="/upload_page">Upload Photo</a>
+    <a href="/result">Present Students</a>
+</nav>
+
+<div class="container">
+    {% block content %}
+    {% endblock %}
+</div>
+
+<div id="overlay" class="overlay"></div>
+<div id="popup" class="popup">
+    <p>Training in progress, please wait...</p>
+</div>
+
+</body>
+</html>

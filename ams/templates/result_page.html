@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Present Students - Adarsh ka project{% endblock %}
+
+{% block content %}
+<center>
+    <h2>Present Students</h2>
+    {% if pre %}
+        <div style="margin: 20px; color: red;">
+            <ul>
+                {% for name in pre %}
+                    <li>{{ name }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        <p>No students present.</p>
+    {% endif %}
+</center>
+{% endblock %}

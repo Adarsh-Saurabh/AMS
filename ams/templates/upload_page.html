@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Photo - Adarsh ka project{% endblock %}
+
+{% block content %}
+<center>
+    <h2>Upload Class Photo</h2>
+    <form method="post" action="{% url 'face_detect' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="image" accept="image/*" required>
+        <button class="btn" type="submit">Upload and Process Image</button>
+    </form>
+</center>
+{% endblock %}

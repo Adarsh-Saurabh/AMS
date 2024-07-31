@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Train Model - Adarsh ka project{% endblock %}
+
+{% block content %}
+<center>
+    <h2>Train the Images Model</h2>
+    <div style="margin: 20px;">
+        <form method="post" action="{% url 'training' %}" onsubmit="showPopup()">
+            {% csrf_token %}
+            <button class="btn" type="submit">Start Training</button>
+        </form>
+    </div>
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <p class="{{ message.tags }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+</center>
+{% endblock %}

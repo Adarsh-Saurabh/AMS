@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Adarsh ka project{% endblock %}
+
+{% block content %}
+<center>
+    <h2>Create a Dataset of Your Images</h2>
+    <form action="/" method="post">
+        {% csrf_token %}
+        <label for="student_name">Name of the student:</label>
+        <input type="text" name="student_name" required>
+        <button class="btn" type="submit">Click images</button>
+    </form>
+</center>
+
+<div style="margin: 20px;">
+    <h2>Registered Students</h2>
+    <ul>
+        {% if students %}
+        {% for student in students %}
+            <li>{{ student }}</li>
+        {% endfor %}
+        {% endif %}
+    </ul>
+    <form action="{% url 'delete_all' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete The Database</button>
+    </form>
+</div>
+
+{% endblock %}

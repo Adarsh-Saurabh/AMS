@@ -83,14 +83,15 @@
         }
     </style>
     <script>
-        function showPopup() {
+        function showPopup(popupId) {
             document.getElementById('overlay').classList.add('active');
-            document.getElementById('popup').classList.add('active');
+            document.getElementById(popupId).classList.add('active');
         }
 
         function hidePopup() {
             document.getElementById('overlay').classList.remove('active');
-            document.getElementById('popup').classList.remove('active');
+            const popups = document.querySelectorAll('.popup');
+            popups.forEach(popup => popup.classList.remove('active'));
         }
 
         document.addEventListener("DOMContentLoaded", function () {
@@ -122,6 +123,12 @@
 <div id="overlay" class="overlay"></div>
 <div id="popup" class="popup">
     <p>Training in progress, please wait...</p>
+</div>
+<div id="popup-clicking" class="popup">
+    <p>Clicking images, please wait...</p>
+</div>
+<div id="popup-error" class="popup">
+    <p>Error capturing image. Please ensure the camera is on.</p>
 </div>
 
 </body>

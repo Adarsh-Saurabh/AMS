@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Train Model - Adarsh ka project{% endblock %}
+{% block title %}Train Model{% endblock %}
 
 {% block content %}
 <center>
     <h2>Train the Images Model</h2>
     <div style="margin: 20px;">
-        <form method="post" action="{% url 'training' %}" onsubmit="showPopup()">
+        <form method="post" action="{% url 'training' %}" onsubmit="showPopup('popup')">
             {% csrf_token %}
             <button class="btn" type="submit">Start Training</button>
         </form>

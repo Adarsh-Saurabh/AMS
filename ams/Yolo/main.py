@@ -5,6 +5,7 @@ import matplotlib.image as mpimg
 import yaml
 import math
 from ultralytics import YOLO
+from mtcnn import MTCNN
 
 def crop_bbox(image, boxes):
     cropped_images = []
@@ -19,8 +20,8 @@ def crop_faces_with_yolo_haar(image_path):
     frame = cv2.imread(image_path)
     my_model = YOLO('./Yolo/best.pt')
 
-    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-    
+    # Initialize MTCNN
+    mtcnn_detector = MTCNN()
 
     result = my_model(frame, conf=0.15)[0]
     boxes = result.boxes
@@ -28,15 +29,18 @@ def crop_faces_with_yolo_haar(image_path):
     output_folder = "./faces"
     os.makedirs(output_folder, exist_ok=True)
     for i, cropped_image in enumerate(cropped_images):
-        gray = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2GRAY)
-        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.01, minNeighbors=5, minSize=(30, 30))
-        if len(faces) > 0:
-            for j, (x, y, w, h) in enumerate(faces):
+        # Convert to RGB for MTCNN
+        rgb_image = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB)
+        faces = mtcnn_detector.detect_faces(rgb_image)
+        if faces:
+            for j, face in enumerate(faces):
+                x, y, w, h = face['box']
                 cropped_face = cropped_image[y:y+h, x:x+w]
                 output_path = os.path.join(output_folder, f"face_{i}_{j}.jpg")
                 cv2.imwrite(output_path, cropped_face)
                 print(f"Saved: {output_path}")
         else:
+            continue
             output_path = os.path.join(output_folder, f"face_{i}_no_face_detected.jpg")
             cv2.imwrite(output_path, cropped_image)
             print(f"No face detected in cropped image, saved: {output_path}")

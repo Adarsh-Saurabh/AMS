@@ -50,12 +50,6 @@ def capture_and_save_photos(person_name, num_photos):
     cap.release()
     cv2.destroyAllWindows()
 
-# Ask the user to enter the name of the folder
-# folder_name = input("Enter the name of the folder to save the photos: ")
-
-# # Capture and save photos
-# capture_and_save_photos(folder_name, num_photos=150)
-
 
 
 
@@ -84,39 +78,17 @@ def ml_function():
     # Parameters
     img_height, img_width = 100, 100  # Input size for ResNetV2
     batch_size = 32
-    epochs = 10
+    epochs = 20
     num_classes = len(os.listdir(main_directory))  # Number of class folders
 
-    # Create ImageDataGenerator for data augmentation
-    # train_datagen = ImageDataGenerator(
-    #     rescale=1.0/255,
-    #     rotation_range=30,
-    #     width_shift_range=0.1,
-    #     height_shift_range=0.1,
-    #     shear_range=0.1,
-    #     zoom_range=0.1,
-    #     horizontal_flip=True,
-    #     vertical_flip=True,
-    #     validation_split=0.2
-    # )
-    train_datagen = ImageDataGenerator(
+    # Simple ImageDataGenerator without augmentation
+    datagen = ImageDataGenerator(
         rescale=1.0/255,
-        rotation_range=40,         # Increased rotation range
-        width_shift_range=0.2,     # Increased width shift range
-        height_shift_range=0.2,    # Increased height shift range
-        shear_range=0.2,           # Increased shear range
-        zoom_range=0.2,            # Increased zoom range
-        horizontal_flip=True,
-        vertical_flip=True,
-        brightness_range=[0.8, 1.2],  # Randomly adjust brightness
-        channel_shift_range=0.2,      # Randomly shift channels
-        fill_mode='nearest',          # Filling newly created pixels
-        validation_split=0.2,
-        # preprocessing_function=add_gaussian_blur  # Add custom preprocessing function
+        validation_split=0.2
     )
 
-    # Generate batches of augmented data from the directories
-    train_generator = train_datagen.flow_from_directory(
+    # Generate batches of data from the directories
+    train_generator = datagen.flow_from_directory(
         main_directory,
         target_size=(img_height, img_width),
         batch_size=batch_size,
@@ -124,7 +96,7 @@ def ml_function():
         subset='training'
     )
 
-    validation_generator = train_datagen.flow_from_directory(
+    validation_generator = datagen.flow_from_directory(
         main_directory,
         target_size=(img_height, img_width),
         batch_size=batch_size,
@@ -151,7 +123,6 @@ def ml_function():
     x = layers.Dropout(0.5)(x)
     predictions = layers.Dense(num_classes, activation='softmax')(x)
 
-
     # Create the model
     model = models.Model(inputs=base_model.input, outputs=predictions)
 
@@ -163,10 +134,8 @@ def ml_function():
     # Train the model
     history = model.fit(
         train_generator,
-        # steps_per_epoch=train_generator.samples // batch_size,
         epochs=epochs,
-        validation_data=validation_generator,
-        # validation_steps=validation_generator.samples // batch_size
+        validation_data=validation_generator
     )
 
     # Save the model
@@ -192,28 +161,8 @@ def load_and_preprocess_image(img_path):
     img_array /= 255.0
     return img_array
 
-# Function to predict the class of images in a folder
-# def predict_classes():
-#     model = tf.keras.models.load_model("resnet50v2_classifier.keras")
 
-#     # Load class labels
-#     with open('class_labels.json', 'r') as f:
-#         class_labels = json.load(f)
 
-#     # Parameters
-#     folder_path = "./faces"
-#     # predicted_class_names = set()
-#     predicted_class_names = []
-#     for img_file in os.listdir(folder_path):
-#         if img_file.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
-#             img_path = os.path.join(folder_path, img_file)
-#             img_array = load_and_preprocess_image(img_path)
-#             predictions = model.predict(img_array)
-#             predicted_class = np.argmax(predictions, axis=1)[0]
-#             predicted_class_name = class_labels[str(predicted_class)]
-#             # predicted_class_names.add(predicted_class_name)
-#             predicted_class_names.append(predicted_class_name)
-#     return predicted_class_names
 
 def predict_classes():
     model = tf.keras.models.load_model("resnet50v2_classifier.keras")
@@ -225,132 +174,27 @@ def predict_classes():
     # Parameters
     folder_path = "./faces"
     predicted_class_names = []
-    # predicted_class_names = set()
+
     for img_file in os.listdir(folder_path):
         if img_file.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
             img_path = os.path.join(folder_path, img_file)
             img_array = load_and_preprocess_image(img_path)
             predictions = model.predict(img_array)
             predicted_class = np.argmax(predictions, axis=1)[0]
-            predicted_class_name = class_labels[str(predicted_class)]
-            prediction_accuracy = np.max(predictions, axis=1)[0] * 100  # Convert to percentage
-            # predicted_class_names.add((predicted_class_name, prediction_accuracy))
-            # predicted_class_names.append((predicted_class_name, prediction_accuracy))
-            predicted_class_names.append((predicted_class_name))
+            prediction_accuracy = np.max(predictions, axis=1)[0]
+            
+            if prediction_accuracy >= 0.6:  # 60% threshold
+                predicted_class_name = class_labels[str(predicted_class)]
+            else:
+                predicted_class_name = 'Non Registered Image'
+            
+            print(img_path, prediction_accuracy, predicted_class_name)
+            predicted_class_names.append(predicted_class_name)
     
-    # for name, accuracy in predicted_class_names:
-    #     print(f"Class: {name}, Accuracy: {accuracy:.2f}%")
     for name in predicted_class_names:
-        name
+        print(name)
     
     return set(predicted_class_names)
 
 
 
-
-
-# def ml_function():
-#     main_directory = "./people"
-
-#     # Parameters
-#     img_height, img_width = 100, 100  # Input size for ResNetV2
-#     batch_size = 32
-#     epochs = 10
-#     num_classes = len(os.listdir(main_directory))  # Number of class folders
-
-#     # Create ImageDataGenerator for data augmentation
-#     train_datagen = ImageDataGenerator(
-#         rescale=1.0/255,
-#         rotation_range=20,
-#         width_shift_range=0.1,
-#         height_shift_range=0.1,
-#         shear_range=0.1,
-#         zoom_range=0.1,
-#         horizontal_flip=True,
-#         vertical_flip=True,
-#         validation_split=0.2
-#     )
-
-#     # Generate batches of augmented data from the directories
-#     train_generator = train_datagen.flow_from_directory(
-#         main_directory,
-#         target_size=(img_height, img_width),
-#         batch_size=batch_size,
-#         class_mode='categorical',
-#         subset='training'
-#     )
-
-#     validation_generator = train_datagen.flow_from_directory(
-#         main_directory,
-#         target_size=(img_height, img_width),
-#         batch_size=batch_size,
-#         class_mode='categorical',
-#         subset='validation'
-#     )
-
-#     # Load pre-trained ResNetV2-50 model without top classification layer
-#     base_model = ResNet50V2(input_shape=(img_height, img_width, 3), include_top=False, weights='imagenet')
-
-#     # Freeze the base model
-#     base_model.trainable = False
-
-#     # Add classification layers on top of the base model
-#     x = base_model.output
-#     x = layers.GlobalAveragePooling2D()(x)
-#     x = layers.Dense(512, activation='relu')(x)
-#     x = layers.Dropout(0.5)(x)
-#     predictions = layers.Dense(num_classes, activation='softmax')(x)
-
-#     # Create the model
-#     model = models.Model(inputs=base_model.input, outputs=predictions)
-
-#     # Compile the model
-#     model.compile(optimizer='adam',
-#                   loss='categorical_crossentropy',
-#                   metrics=['accuracy'])
-
-#     # Train the model
-#     history = model.fit(
-#         train_generator,
-#         steps_per_epoch=train_generator.samples // batch_size,
-#         epochs=epochs,
-#         validation_data=validation_generator,
-#         validation_steps=validation_generator.samples // batch_size
-#     )
-
-#     # Save the model
-#     model_path = "resnet50v2_classifier.h5"
-#     model.save(model_path)
-#     return model_path
-
-
-
-
-# def load_and_preprocess_image(img_path):
-#     img_height, img_width = 100, 100  # Input size for ResNetV2
-#     img = cv2.imread(img_path)
-#     img_resized = cv2.resize(img, (img_height, img_width))
-#     img_array = image.img_to_array(img_resized)
-#     img_array = np.expand_dims(img_array, axis=0)
-#     img_array /= 255.0
-#     return img_array
-# # Function to predict the class of images in a folder
-# def predict_classes():
-#     model = tf.keras.models.load_model("resnet50v2_classifier.h5")
-
-#     # Parameters
-    
-#     folder_path = "./faces"
-#     class_names = set()
-#     cla = []
-#     for img_file in os.listdir(folder_path):
-#         if img_file.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
-#             img_path = os.path.join(folder_path, img_file)
-#             img_array = load_and_preprocess_image(img_path)
-#             predictions = model.predict(img_array)
-#             predicted_class = np.argmax(predictions, axis=1)[0]
-#             # cla.append(predicted_class)
-#             class_names.add(predicted_class)
-#     return class_names
-
-# Example usage

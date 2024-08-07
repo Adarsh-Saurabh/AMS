@@ -1,5 +1,3 @@
-
-
 from django.contrib import messages
 from django.shortcuts import redirect, render
 from .utils import capture_and_save_photos, ml_function, predict_classes
@@ -14,14 +12,16 @@ def index(request):
     if request.method == "POST":
         try:
             name = request.POST.get("student_name")
-            capture_and_save_photos(name, 150)
+            no_of_images = 150
+            capture_and_save_photos(name, no_of_images)
             folder_location = f"./people/{name}"  # Assuming folder location is based on the student's name
             student = Student(name=name, folder_location=folder_location)
             student.save()
+            return redirect('index')
         except Exception as e:
             print("An error occurred in the job request - ", e)
             messages.error(request, "OOPS! Something went wrong")
-            return render(request, "index.html")
+            return render(request, "index.html", {"popup_error": True})
     
     students = Student.objects.values_list('name', flat=True)
     return render(request, "index.html", {"students": students})
@@ -46,6 +46,25 @@ def delete_all(request):
         messages.error(request, "OOPS! Something went wrong")
     
     return redirect('index')
+
+def delete_selected(request):
+    if request.method == "POST":
+        selected_students = request.POST.getlist('selected_students')
+        try:
+            for student_name in selected_students:
+                student = Student.objects.get(name=student_name)
+                student.delete()
+                
+                # Delete the corresponding folder
+                folder_path = f"./people/{student_name}"
+                if os.path.exists(folder_path):
+                    shutil.rmtree(folder_path)
+
+            messages.success(request, "Selected students and their folders have been deleted successfully.")
+        except Exception as e:
+            print("An error occurred in the delete_selected request - ", e)
+            messages.error(request, "OOPS! Something went wrong")
+    
     return redirect('index')
 
 def training_page(request):
